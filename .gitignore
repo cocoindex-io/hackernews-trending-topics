@@ -1,1 +1,7 @@
 .env
+__pycache__/
+*.egg-info/
+.venv/
+
+# CocoIndex local incremental-processing state (COCOINDEX_DB)
+cocoindex.db/

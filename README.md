@@ -29,22 +29,20 @@
 
 
 
-In this example, we use [CocoIndex Custom Source](https://cocoindex.io/docs/custom_ops/custom_targets) to define a source to get HackerNews recent content by calling [HackerNews API](https://hn.algolia.com/api).
-We build an index for HackerNews threads and their comments, and use LLM to extract trending topics from the text.
+In this example, we call the [HackerNews API](https://hn.algolia.com/api) to fetch recent threads and their comments, then use an LLM to extract trending topics from the text. Each thread becomes one CocoIndex processing component (`mount_each`), and the results are stored in two Postgres tables — so re-running only re-processes threads that changed.
 
-The pipeline uses `ExtractByLlm` to identify topics like product names, technologies, models, and company names mentioned in threads and comments, storing them in canonical form (avoiding acronyms unless very popular).
+The LLM extracts topics like product names, technologies, models, and company names, storing them in canonical form (avoiding acronyms unless very popular). Topic extraction is memoized (`@coco.fn(memo=True)`), so unchanged threads don't trigger new LLM calls.
 
 We appreciate a star ⭐ at [CocoIndex Github](https://github.com/cocoindex-io/cocoindex) if this is helpful.
 
 
 ## Features
 
-- **Custom Source Integration**: Fetches HackerNews threads and comments via API
-- **LLM Topic Extraction**: Automatically extracts topics using `ExtractByLlm` function
-- **Canonical Topic Forms**: Topics are stored in canonical form (e.g., "Large Language Model" instead of "LLM")
-- **Multiple Query Handlers**:
-  - `search_by_topic`: Search content by specific topic
-  - `get_trending_topics`: Get trending topics ranked by mention count
+- **HackerNews ingestion**: Fetches recent threads and comments via the HN API.
+- **LLM topic extraction**: Extracts topics from each thread/comment via an LLM (LiteLLM — swap any model with `LLM_MODEL`).
+- **Canonical topic forms**: Topics are stored canonically (e.g., "Large Language Model" instead of "LLM").
+- **Incremental by default**: Memoized extraction + managed Postgres targets — re-run to refresh; only the delta is re-processed and orphaned rows are cleaned up.
+- **Trending + search queries**: Rank topics by a thread/comment-weighted mention score, or search messages by topic.
 
 ## Steps
 
@@ -52,15 +50,16 @@ We appreciate a star ⭐ at [CocoIndex Github](https://github.com/cocoindex-io/c
 <img width="2732" height="2648" alt="flow" src="https://github.com/user-attachments/assets/04172792-7266-4b97-8957-bb481ed2602f" />
 
 
-1. We define a custom source connector `HackerNews` to get HackerNews recent threads by calling HackerNews API.
-2. For each thread and comment, we extract topics using LLM (`ExtractByLlm`).
-3. We build two indexes:
-   - `hn_messages`: Full text of threads and comments
-   - `hn_topics`: Extracted topics with references to their source content, keyed by (topic, message_id)
+1. Fetch recent HackerNews thread IDs from the HN API, and mount one processing component per thread.
+2. Each component fetches its thread + comments and extracts topics with an LLM.
+3. We build two tables:
+   - `hn_messages`: Full text of threads and comments.
+   - `hn_topics`: Extracted topics referencing their source content, keyed by (topic, message_id).
 
 ## Prerequisite
 
-[Install Postgres](https://cocoindex.io/docs/getting_started/installation#-install-postgres) if you don't have one.
+- [Install Postgres](https://cocoindex.io/docs/getting_started/installation#-install-postgres) if you don't have one.
+- Copy `.env.example` to `.env` and set `POSTGRES_URL` and an LLM provider key (`GEMINI_API_KEY` by default, or set `LLM_MODEL=openai/gpt-5-mini` with `OPENAI_API_KEY`).
 
 ## Run
 
@@ -70,46 +69,22 @@ Install dependencies:
 pip install -e .
 ```
 
-Update the target:
+Build / update the index:
 
 ```sh
 cocoindex update main
 ```
 
-Each time when you run the `update` command, cocoindex will only re-process threads that have changed, and keep the target in sync with the recent 500 threads from HackerNews.
-
-You can also run `update` command in live mode, which will keep the target in sync with the source continuously:
-
-```sh
-cocoindex update -L main.py
-```
+Each run keeps the target in sync with the most recent HackerNews threads: unchanged threads are skipped (memoized), new threads are added, and threads that aged out of the feed have their rows cleaned up. Re-run whenever you want to refresh; set `MAX_THREADS` to control how many recent threads to index.
 
 ## Query Examples
 
-After running the pipeline, you can query the extracted topics:
+After building the index, query it from the terminal:
 
 ```sh
-# Get trending topics
-cocoindex query main.py get_trending_topics --limit 20
+# Show the top trending topics, then search interactively
+python main.py
 
-# Search content by specific topic
-cocoindex query main.py search_by_topic --topic "Claude"
-
-# Search by text content
-cocoindex query main.py search_text --query "artificial intelligence"
+# Search messages mentioning a specific topic
+python main.py "Claude"
 ```
-
-## CocoInsight
-
-I used CocoInsight (Free beta now) to troubleshoot the index generation and understand the data lineage of the pipeline.
-It just connects to your local CocoIndex server, with Zero pipeline data retention. Run following command to start CocoInsight:
-
-```
-cocoindex server -ci -L main
-```
-
-<img width="2736" height="1384" alt="cocoinsight" src="https://github.com/user-attachments/assets/05f754b2-77c4-4cbe-a74e-04b70f9add76" />
-
-
-
-Then open the CocoInsight UI at [https://cocoindex.io/cocoinsight](https://cocoindex.io/cocoinsight).
