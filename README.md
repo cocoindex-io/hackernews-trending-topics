@@ -47,7 +47,10 @@ We appreciate a star ⭐ at [CocoIndex Github](https://github.com/cocoindex-io/c
 ## Steps
 
 ### Indexing Flow
-<img width="2732" height="2648" alt="flow" src="https://github.com/user-attachments/assets/04172792-7266-4b97-8957-bb481ed2602f" />
+
+<p align="center">
+  <img src="docs/flow-v1.svg" alt="CocoIndex v1 flow: app_main fetches recent HN thread IDs and mounts one process_thread component per thread; each component fetches the thread and comments, extracts canonical topics with an LLM via LiteLLM, and declares rows into the Postgres tables hn_messages and hn_topics" width="840"/>
+</p>
 
 
 1. Fetch recent HackerNews thread IDs from the HN API, and mount one processing component per thread.

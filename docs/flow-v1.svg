@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 860" width="1100" height="860" font-family="Inter, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" role="img" aria-label="CocoIndex v1 flow for HackerNews Trending Topics: app_main fetches recent HN thread IDs and mounts one process_thread component per thread; each component fetches the thread and comments, extracts canonical topics with an LLM via LiteLLM, and declares rows into the Postgres tables hn_messages and hn_topics.">
+  <defs>
+    <style>
+      svg{
+        --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+        --sans:"Inter",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      }
+      .kick{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;fill:#BE5133}
+      .kickm{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;fill:#8A6E73}
+      .code{font-family:var(--mono);font-size:13.5px;font-weight:600;fill:#2A121B}
+      .codes{font-family:var(--mono);font-size:11.5px;fill:#8A6E73}
+      .h{font-family:var(--sans);font-size:16px;font-weight:600;fill:#2A121B}
+      .t{font-family:var(--sans);font-size:13px;fill:#2A121B}
+      .tm{font-family:var(--sans);font-size:12.5px;fill:#8A6E73}
+      .pill{font-family:var(--mono);font-size:13px;font-weight:600;fill:#FCF3D8}
+      .edge{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.04em;fill:#8A6E73}
+    </style>
+    <marker id="arw" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#532638"/>
+    </marker>
+  </defs>
+
+  <!-- panel -->
+  <rect x="6" y="6" width="1088" height="848" rx="20" fill="#FBF6E8" stroke="rgba(42,18,27,0.14)" stroke-width="1.5"/>
+  <text x="44" y="46" class="kick">COCOINDEX · V1 FLOW</text>
+
+  <!-- arrows (drawn first, under nodes) -->
+  <g fill="none" stroke="#532638" stroke-width="1.8" marker-end="url(#arw)">
+    <path d="M550,160 L550,186"/>
+    <path d="M550,284 L550,314"/>
+    <path d="M432,418 L554,418"/>
+    <path d="M300,466 L452,552"/>
+    <path d="M724,478 L650,552"/>
+    <path d="M474,646 L332,726"/>
+    <path d="M628,646 L780,726"/>
+  </g>
+
+  <!-- A: source -->
+  <rect x="400" y="84" width="300" height="76" rx="16" fill="#FCF3D8" stroke="#BE5133" stroke-width="1.5"/>
+  <text x="550" y="108" text-anchor="middle" class="kickm">SOURCE</text>
+  <text x="550" y="130" text-anchor="middle" class="h">HackerNews API</text>
+  <text x="550" y="149" text-anchor="middle" class="codes">hn.algolia.com</text>
+
+  <!-- B: app_main -->
+  <rect x="330" y="190" width="440" height="92" rx="14" fill="#F6F4E9" stroke="#532638" stroke-width="1.5"/>
+  <text x="354" y="216" class="kick">ENTRY</text>
+  <text x="354" y="238" class="code">app_main()</text>
+  <text x="354" y="259" class="t">Fetch recent thread IDs from HN</text>
+  <text x="354" y="277" class="codes">coco.mount_each(process_thread, …)</text>
+  <text x="566" y="304" class="edge">one component per thread</text>
+
+  <!-- C: per-thread container -->
+  <rect x="90" y="320" width="920" height="380" rx="18" fill="rgba(190,81,51,0.05)" stroke="#BE5133" stroke-width="1.5" stroke-dasharray="7 6"/>
+  <rect x="112" y="302" width="372" height="38" rx="19" fill="#532638"/>
+  <text x="132" y="326" class="pill">process_thread · @coco.fn(memo)</text>
+
+  <!-- C1: fetch -->
+  <rect x="130" y="372" width="300" height="94" rx="12" fill="#FCF3D8" stroke="rgba(42,18,27,0.18)" stroke-width="1.3"/>
+  <text x="152" y="398" class="kickm">FETCH</text>
+  <text x="152" y="421" class="code">fetch_thread()</text>
+  <text x="152" y="443" class="tm">thread text + all comments</text>
+
+  <!-- C2: extract (LLM) -->
+  <rect x="560" y="360" width="330" height="118" rx="12" fill="#FCF3D8" stroke="#BE5133" stroke-width="1.5"/>
+  <rect x="812" y="372" width="62" height="20" rx="10" fill="rgba(190,81,51,0.14)" stroke="#BE5133" stroke-width="1"/>
+  <text x="843" y="386" text-anchor="middle" class="kick" font-size="9.5">memo</text>
+  <text x="584" y="388" class="kick">LLM · EXTRACT</text>
+  <text x="584" y="411" class="code">extract_topics()</text>
+  <text x="584" y="433" class="t">LiteLLM · LLM_MODEL</text>
+  <text x="584" y="453" class="tm">→ canonical topics[ ]</text>
+  <text x="493" y="409" text-anchor="middle" class="edge">text</text>
+
+  <!-- C3: declare rows -->
+  <rect x="360" y="556" width="380" height="88" rx="14" fill="#F6F4E9" stroke="#532638" stroke-width="1.5"/>
+  <text x="382" y="585" class="code">declare_row()</text>
+  <text x="382" y="608" class="tm">messages.declare_row(HnMessage)</text>
+  <text x="382" y="628" class="tm">topics.declare_row(HnTopic)</text>
+
+  <!-- D: targets -->
+  <rect x="150" y="730" width="340" height="104" rx="12" fill="#FCF3D8" stroke="#532638" stroke-width="1.5"/>
+  <text x="172" y="758" class="kickm">POSTGRES TABLE</text>
+  <text x="172" y="783" class="h">hn_messages</text>
+  <text x="172" y="805" class="codes" fill="#BE5133">PK&#160;&#160;id</text>
+  <text x="172" y="823" class="tm">full text of threads &amp; comments</text>
+
+  <rect x="610" y="730" width="340" height="104" rx="12" fill="#FCF3D8" stroke="#532638" stroke-width="1.5"/>
+  <text x="632" y="758" class="kickm">POSTGRES TABLE</text>
+  <text x="632" y="783" class="h">hn_topics</text>
+  <text x="632" y="805" class="codes" fill="#BE5133">PK&#160;&#160;(topic, message_id)</text>
+  <text x="632" y="823" class="tm">extracted topics → source rows</text>
+</svg>
